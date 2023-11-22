@@ -14,6 +14,7 @@ class OverwatchBlocker:
         self.window.title("Overwatch Blocker")
         self.thread = threading.Thread(target=self.bnet_blocker)
         self.status = tk.Label(self.window, text="Overwatch/Bnet is being blocked.")
+        self.timeinput = tk.Entry(self.window)
 
         self.logging_text = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, width=500, height=300)
 
@@ -21,6 +22,7 @@ class OverwatchBlocker:
 
     def __del__(self):
         self.thread.join()
+        self.timerthread.join()
 
     def bnet_blocker(self):
         while self.blocker:
@@ -35,9 +37,34 @@ class OverwatchBlocker:
             time.sleep(15)
 
     def completed_drawing(self):
+        #print("completed drawing called")
         self.blocker = False
         self.thread.join()
         self.status.config(text="Overwatch is not being blocked anymore. Have Fun!")
+    
+    def start_timer(self):
+        #print("starting timer")
+        maxtime = self.timeinput.get()
+        #print(maxtime)
+        self.timerthread = threading.Thread(target=self.timer_function, args=(maxtime,))
+        self.timerthread.start()
+
+    def timer_function(self, maxtime):
+        #print("timer started.")
+        curr_time = int(maxtime)
+        while (curr_time > 0):
+            curr_time -= 1
+            #print("curr_time = " + str(curr_time))
+            time.sleep(1)
+        #print("completed drawing")
+        self.completed_drawing()
+        return
+
+    def create_timer(self):
+        #print("creating timer")
+        button_font = tkFont.Font(family="Arial", size=16)
+        timer_button = tk.Button(self.window, text="Start Timer", command=self.start_timer, font=button_font)
+        timer_button.pack()
 
     def start_app(self):
         self.thread.start()
@@ -56,6 +83,9 @@ class OverwatchBlocker:
 
         drawing_complete = tk.Button(self.window, text="Completed Drawing", command=self.completed_drawing, font=button_font)
         drawing_complete.pack()
+
+        self.timeinput.pack()
+        self.create_timer()
 
         gap = tk.Label(self.window, text="")
         gap.pack()
