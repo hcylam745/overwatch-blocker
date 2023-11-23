@@ -54,6 +54,7 @@ class OverwatchBlocker:
         curr_time = int(maxtime)
         while (curr_time > 0):
             curr_time -= 1
+            self.time_display.config(text="Remaining Time: " + str(curr_time))
             #print("curr_time = " + str(curr_time))
             time.sleep(1)
         #print("completed drawing")
@@ -87,8 +88,8 @@ class OverwatchBlocker:
         self.timeinput.pack()
         self.create_timer()
 
-        gap = tk.Label(self.window, text="")
-        gap.pack()
+        self.time_display = tk.Label(self.window, text="")
+        self.time_display.pack()
         self.status.pack()
 
         space2 = tk.Label(self.window, text="\n\n")
