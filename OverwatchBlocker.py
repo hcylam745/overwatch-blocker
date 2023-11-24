@@ -4,6 +4,8 @@ from tkinter import scrolledtext
 import psutil
 import threading
 
+from tkinter import ttk
+
 import time
 import datetime
 
@@ -14,7 +16,7 @@ class OverwatchBlocker:
         self.window.title("Overwatch Blocker")
         self.thread = threading.Thread(target=self.bnet_blocker)
         self.status = tk.Label(self.window, text="Overwatch/Bnet is being blocked.")
-        self.timeinput = tk.Entry(self.window)
+        self.timer_options = []
 
         self.logging_text = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, width=500, height=300)
 
@@ -44,7 +46,13 @@ class OverwatchBlocker:
     
     def start_timer(self):
         #print("starting timer")
-        maxtime = self.timeinput.get()
+        #maxtime = self.timeinput.get()
+        inputted_time = datetime.timedelta(hours=int(self.timer_options[0].get() + self.timer_options[1].get()),
+                                minutes=int(self.timer_options[2].get() + self.timer_options[3].get()),
+                                seconds=int(self.timer_options[4].get() + self.timer_options[5].get()))
+            
+        maxtime = inputted_time.total_seconds()
+
         #print(maxtime)
         self.timerthread = threading.Thread(target=self.timer_function, args=(maxtime,))
         self.timerthread.start()
@@ -54,7 +62,8 @@ class OverwatchBlocker:
         curr_time = int(maxtime)
         while (curr_time > 0):
             curr_time -= 1
-            self.time_display.config(text="Remaining Time: " + str(curr_time))
+            time_delta = datetime.timedelta(seconds=curr_time)
+            self.time_display.config(text="Remaining Time: " + str(time_delta))
             #print("curr_time = " + str(curr_time))
             time.sleep(1)
         #print("completed drawing")
@@ -63,9 +72,45 @@ class OverwatchBlocker:
 
     def create_timer(self):
         #print("creating timer")
+
+        timer_container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
+        timer_container.pack(fill="both", expand=True)
+
+        counter = 0
+        for i in range(6):
+            option_list = []
+            if i % 2 == 0:
+                option_list = ["0", "0", "1", "2", "3", "4", "5"]
+            else:
+                option_list = ["0", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+            base_timer_text = tk.StringVar(timer_container)
+            base_timer_text.set(option_list[0])
+
+            tmp = ttk.OptionMenu(timer_container, base_timer_text, *option_list)
+            tmp.pack(side="left")
+            counter += 1
+            self.timer_options.append(base_timer_text)
+
+            if i % 2 == 1 and i != 5:
+                tmp_font = tkFont.Font(family="Arial", size=12)
+
+                spacing = tk.Label(timer_container, bg="lightgray", text="", font=tmp_font)
+                spacing.pack(side="left")
+
+                tmp_text = tk.Label(timer_container, bg="lightgray", text=":", font=tmp_font)
+                tmp_text.pack(side="left")
+
+                spacing2 = tk.Label(timer_container, bg="lightgray", text="", font=tmp_font)
+                spacing2.pack(side="left")
+
+
+
+        
+
         button_font = tkFont.Font(family="Arial", size=16)
-        timer_button = tk.Button(self.window, text="Start Timer", command=self.start_timer, font=button_font)
-        timer_button.pack()
+        timer_button = tk.Button(timer_container, text="Start Timer", command=self.start_timer, font=button_font)
+        timer_button.pack(side="bottom")
 
     def start_app(self):
         self.thread.start()
@@ -85,7 +130,6 @@ class OverwatchBlocker:
         drawing_complete = tk.Button(self.window, text="Completed Drawing", command=self.completed_drawing, font=button_font)
         drawing_complete.pack()
 
-        self.timeinput.pack()
         self.create_timer()
 
         self.time_display = tk.Label(self.window, text="")
