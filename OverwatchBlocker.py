@@ -18,6 +18,11 @@ class OverwatchBlocker:
         self.status = tk.Label(self.window, text="Overwatch/Bnet is being blocked.")
         self.timer_options = []
 
+        self.container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
+        self.container.pack(fill="both", expand=True)
+
+        self.toggle_var = "timer"
+
         self.logging_text = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, width=500, height=300)
 
         self.start_app()
@@ -47,6 +52,7 @@ class OverwatchBlocker:
     def start_timer(self):
         #print("starting timer")
         #maxtime = self.timeinput.get()
+        #self.start_blocker()
         inputted_time = datetime.timedelta(hours=int(self.timer_options[0].get() + self.timer_options[1].get()),
                                 minutes=int(self.timer_options[2].get() + self.timer_options[3].get()),
                                 seconds=int(self.timer_options[4].get() + self.timer_options[5].get()))
@@ -72,10 +78,6 @@ class OverwatchBlocker:
 
     def create_timer(self):
         #print("creating timer")
-
-        timer_container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
-        timer_container.pack(fill="both", expand=True)
-
         counter = 0
         for i in range(6):
             option_list = []
@@ -84,10 +86,10 @@ class OverwatchBlocker:
             else:
                 option_list = ["0", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-            base_timer_text = tk.StringVar(timer_container)
+            base_timer_text = tk.StringVar(self.container)
             base_timer_text.set(option_list[0])
 
-            tmp = ttk.OptionMenu(timer_container, base_timer_text, *option_list)
+            tmp = ttk.OptionMenu(self.container, base_timer_text, *option_list)
             tmp.pack(side="left")
             counter += 1
             self.timer_options.append(base_timer_text)
@@ -95,13 +97,13 @@ class OverwatchBlocker:
             if i % 2 == 1 and i != 5:
                 tmp_font = tkFont.Font(family="Arial", size=12)
 
-                spacing = tk.Label(timer_container, bg="lightgray", text="", font=tmp_font)
+                spacing = tk.Label(self.container, bg="lightgray", text="", font=tmp_font)
                 spacing.pack(side="left")
 
-                tmp_text = tk.Label(timer_container, bg="lightgray", text=":", font=tmp_font)
+                tmp_text = tk.Label(self.container, bg="lightgray", text=":", font=tmp_font)
                 tmp_text.pack(side="left")
 
-                spacing2 = tk.Label(timer_container, bg="lightgray", text="", font=tmp_font)
+                spacing2 = tk.Label(self.container, bg="lightgray", text="", font=tmp_font)
                 spacing2.pack(side="left")
 
 
@@ -109,8 +111,31 @@ class OverwatchBlocker:
         
 
         button_font = tkFont.Font(family="Arial", size=16)
-        timer_button = tk.Button(timer_container, text="Start Timer", command=self.start_timer, font=button_font)
+        timer_button = tk.Button(self.container, text="Start Timer", command=self.start_timer, font=button_font)
         timer_button.pack(side="bottom")
+
+    def create_button(self):
+        #self.start_blocker()
+        button_font = tkFont.Font(family="Arial", size=16)
+        drawing_complete = tk.Button(self.container, text="Completed Drawing", command=self.completed_drawing, font=button_font)
+        drawing_complete.pack()
+
+    def toggle_func(self):
+        self.destroy_container()
+        
+        if self.toggle_var == "timer":
+            self.toggle_var = "button"
+            self.create_button()
+            self.toggle.config(text="Button")
+        else:
+            self.toggle_var = "timer"
+            self.create_timer()
+            self.toggle.config(text="Timer")
+
+    def destroy_container(self):
+        self.timer_options = []
+        for widget in self.container.winfo_children():
+            widget.destroy()
 
     def start_app(self):
         self.thread.start()
@@ -127,8 +152,8 @@ class OverwatchBlocker:
 
         button_font = tkFont.Font(family="Arial", size=16)
 
-        drawing_complete = tk.Button(self.window, text="Completed Drawing", command=self.completed_drawing, font=button_font)
-        drawing_complete.pack()
+        self.toggle = tk.Button(self.window, text="Timer", command=self.toggle_func, font=button_font)
+        self.toggle.pack()
 
         self.create_timer()
 
