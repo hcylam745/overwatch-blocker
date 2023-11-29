@@ -15,7 +15,7 @@ class OverwatchBlocker:
         self.window = tk.Tk()
         self.window.title("Overwatch Blocker")
         self.thread = threading.Thread(target=self.bnet_blocker)
-        self.status = tk.Label(self.window, text="Overwatch/Bnet is being blocked.")
+        self.status = tk.Label(self.window, text="")
         self.timer_options = []
 
         self.container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
@@ -31,6 +31,12 @@ class OverwatchBlocker:
         self.thread.join()
         self.timerthread.join()
 
+    def stop_blocking_text(self):
+        if hasattr(self, 'status'):
+            self.status.config(text="Overwatch is not being blocked anymore. Have Fun!")
+        if hasattr(self, 'time_display'):
+            self.time_display.config(text="")
+
     def bnet_blocker(self):
         while self.blocker:
             for program in psutil.process_iter():
@@ -41,43 +47,48 @@ class OverwatchBlocker:
 
                     self.logging_text.insert(tk.END, datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": Blocking " + program.name() + "\n")
                     self.logging_text.see(tk.END)
-            time.sleep(15)
+            time.sleep(1)
+        self.window.after(0, self.stop_blocking_text)
+
+            
+    def start_blocker(self):
+        self.init_blocker()
+        self.status.config(text="Overwatch is being blocked.")
+        self.blocker = True
+        self.thread.start()
+
+    def init_blocker(self):
+        if self.thread.is_alive():
+            self.blocker = False
+            self.thread.join()
+
+        self.thread = threading.Thread(target=self.bnet_blocker)
 
     def completed_drawing(self):
-        #print("completed drawing called")
         self.blocker = False
-        self.thread.join()
-        self.status.config(text="Overwatch is not being blocked anymore. Have Fun!")
     
     def start_timer(self):
-        #print("starting timer")
-        #maxtime = self.timeinput.get()
-        #self.start_blocker()
+        self.start_blocker()
         inputted_time = datetime.timedelta(hours=int(self.timer_options[0].get() + self.timer_options[1].get()),
                                 minutes=int(self.timer_options[2].get() + self.timer_options[3].get()),
                                 seconds=int(self.timer_options[4].get() + self.timer_options[5].get()))
             
         maxtime = inputted_time.total_seconds()
-
-        #print(maxtime)
         self.timerthread = threading.Thread(target=self.timer_function, args=(maxtime,))
         self.timerthread.start()
 
     def timer_function(self, maxtime):
-        #print("timer started.")
-        curr_time = int(maxtime)
-        while (curr_time > 0):
-            curr_time -= 1
-            time_delta = datetime.timedelta(seconds=curr_time)
+        self.curr_time = int(maxtime)
+        while (self.curr_time > 0):
+            self.curr_time -= 1
+            time_delta = datetime.timedelta(seconds=self.curr_time)
             self.time_display.config(text="Remaining Time: " + str(time_delta))
-            #print("curr_time = " + str(curr_time))
             time.sleep(1)
-        #print("completed drawing")
-        self.completed_drawing()
+        self.blocker = False
         return
 
     def create_timer(self):
-        #print("creating timer")
+        self.init_blocker()
         counter = 0
         for i in range(6):
             option_list = []
@@ -115,7 +126,7 @@ class OverwatchBlocker:
         timer_button.pack(side="bottom")
 
     def create_button(self):
-        #self.start_blocker()
+        self.start_blocker()
         button_font = tkFont.Font(family="Arial", size=16)
         drawing_complete = tk.Button(self.container, text="Completed Drawing", command=self.completed_drawing, font=button_font)
         drawing_complete.pack()
@@ -124,13 +135,20 @@ class OverwatchBlocker:
         self.destroy_container()
         
         if self.toggle_var == "timer":
+            if hasattr(self, 'timerthread') and self.timerthread.is_alive():
+                self.curr_time = 0
+                self.timerthread.join()
+
             self.toggle_var = "button"
             self.create_button()
             self.toggle.config(text="Button")
+            self.time_display.config(text="")
+            self.status.config(text="Overwatch is being blocked.")
         else:
             self.toggle_var = "timer"
             self.create_timer()
             self.toggle.config(text="Timer")
+            self.status.config(text="")
 
     def destroy_container(self):
         self.timer_options = []
@@ -138,7 +156,7 @@ class OverwatchBlocker:
             widget.destroy()
 
     def start_app(self):
-        self.thread.start()
+        #self.thread.start()
 
         self.window.geometry("600x600")
 
