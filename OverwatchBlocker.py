@@ -3,6 +3,8 @@ import tkinter.font as tkFont
 from tkinter import scrolledtext
 import psutil
 import threading
+import multiprocessing
+import sys
 
 from tkinter import ttk
 
@@ -15,8 +17,12 @@ class OverwatchBlocker:
         self.window = tk.Tk()
         self.window.title("Overwatch Blocker")
         self.thread = threading.Thread(target=self.bnet_blocker)
+        self.thread.daemon = False
         self.status = tk.Label(self.window, text="")
         self.timer_options = []
+        self.minimized = False
+
+        self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
         self.container.pack(fill="both", expand=True)
@@ -27,9 +33,13 @@ class OverwatchBlocker:
 
         self.start_app()
 
-    def __del__(self):
-        self.thread.join()
-        self.timerthread.join()
+    # def __del__(self):
+    #     self.thread.join()
+    #     self.timerthread.join()
+
+    def on_closing(self):
+        self.window.withdraw()
+        self.minimized = True
 
     def stop_blocking_text(self):
         if hasattr(self, 'status'):
@@ -37,16 +47,23 @@ class OverwatchBlocker:
         if hasattr(self, 'time_display'):
             self.time_display.config(text="")
 
+        if self.minimized == True:
+            self.window.destroy()
+            sys.exit()
+
     def bnet_blocker(self):
         while self.blocker:
             for program in psutil.process_iter():
                 if program.name() == "Battle.net.exe" or program.name() == "Overwatch.exe":
-                    pid = program.pid
-                    process = psutil.Process(pid)
-                    process.terminate()
+                    try:
+                        pid = program.pid
+                        process = psutil.Process(pid)
+                        process.terminate()
 
-                    self.logging_text.insert(tk.END, datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": Blocking " + program.name() + "\n")
-                    self.logging_text.see(tk.END)
+                        self.logging_text.insert(tk.END, datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S") + ": Blocking " + program.name() + "\n")
+                        self.logging_text.see(tk.END)
+                    except:
+                        pass
             time.sleep(1)
         self.window.after(0, self.stop_blocking_text)
 
@@ -63,6 +80,7 @@ class OverwatchBlocker:
             self.thread.join()
 
         self.thread = threading.Thread(target=self.bnet_blocker)
+        self.thread.daemon = False
 
     def completed_drawing(self):
         self.blocker = False
