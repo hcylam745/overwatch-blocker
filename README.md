@@ -16,4 +16,3 @@ This is a simple tool that detects if Overwatch or Battle.Net (Blizzard's launch
 * Improved UI.
 * Customizable set of programs to block.
 * Custom automatic detection of if a task has been completed.
-* Background running capabilities.
