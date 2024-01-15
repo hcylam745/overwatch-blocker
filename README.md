@@ -15,6 +15,5 @@ To use it, download the .zip file, and open the "Overwatch Blocker.exe" file in 
 <br/>
 
 ## Features in progress:<br/>
-* Improved UI.
 * Customizable set of programs to block.
 * Custom automatic detection of if a task has been completed.
