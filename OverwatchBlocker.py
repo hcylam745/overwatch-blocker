@@ -24,6 +24,8 @@ class OverwatchBlocker:
 
         self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+        self.window.bind("<Key>", self.on_key_press)
+
         self.container = tk.Frame(self.window, bg='lightgrey', padx=20, pady=20)
         self.container.pack(fill="both", expand=True)
 
@@ -32,6 +34,29 @@ class OverwatchBlocker:
         self.logging_text = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, width=500, height=300)
 
         self.start_app()
+
+    def on_key_press(self, event):
+        key = event.char
+
+        if key.isdigit():
+            for i, option in enumerate(self.timer_options):
+                current_num = option.get()
+                triggered = False
+                if current_num != '0':
+                    triggered = True
+                    while (i < len(self.timer_options)):
+                        tmp_num = self.timer_options[i].get()
+                        if (i != 0):
+                            self.timer_options[i-1].set(tmp_num)
+                        self.timer_options[i].set("0")
+                        i += 1
+                    self.timer_options[i-1].set(key)
+                    break
+                    
+                
+            if triggered == False:
+                self.timer_options[len(self.timer_options)-1].set(key)
+
 
     # def __del__(self):
     #     self.thread.join()
