@@ -52,10 +52,21 @@ class OverwatchBlocker:
                         i += 1
                     self.timer_options[i-1].set(key)
                     break
-                    
-                
             if triggered == False:
                 self.timer_options[len(self.timer_options)-1].set(key)
+        elif (key in ("KEY_BACKSPACE", "\b", "\x7f")):
+            curr_num = self.timer_options[0].get()
+            self.timer_options[0].set(0)
+            for i, option in enumerate(self.timer_options):
+                tmp = curr_num
+                if i != len(self.timer_options) - 1:
+                    curr_num = self.timer_options[i+1].get()
+                    self.timer_options[i+1].set(tmp)
+                
+
+                
+
+
 
 
     # def __del__(self):
