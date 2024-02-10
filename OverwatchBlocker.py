@@ -103,7 +103,29 @@ class OverwatchBlocker:
             time.sleep(1)
         self.window.after(0, self.stop_blocking_text)
 
-            
+    def get_running_programs(self):
+        running_programs = []
+
+        for program in psutil.process_iter():
+            running_programs.append(program.name())
+        
+        return running_programs
+
+    def create_selections(self):
+        running_programs = self.get_running_programs()
+        running_programs = list(dict.fromkeys(running_programs))
+        running_programs.sort()
+        option_list = [""]
+        option_list.extend(running_programs)
+
+        base_selections_text = tk.StringVar(self.container)
+        base_selections_text.set(option_list[0])
+
+        option_list = ttk.OptionMenu(self.container, base_selections_text, *option_list)
+        option_list.pack()
+
+
+
     def start_blocker(self):
         self.init_blocker()
         self.status.config(text="Overwatch is being blocked.")
@@ -241,6 +263,6 @@ class OverwatchBlocker:
 
         self.logging_text.pack(expand=True, fill=tk.BOTH)
 
-
+        self.create_selections()
 
         self.window.mainloop()
