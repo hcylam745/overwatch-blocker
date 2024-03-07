@@ -166,6 +166,9 @@ class OverwatchBlocker:
     def create_timer(self):
         self.init_blocker()
         counter = 0
+
+        letter = "H"
+
         for i in range(6):
             option_list = []
             if i % 2 == 0:
@@ -187,11 +190,24 @@ class OverwatchBlocker:
                 spacing = tk.Label(self.container, bg="lightgray", text="", font=tmp_font)
                 spacing.pack(side="left")
 
+                tmp_text2 = tk.Label(self.container, bg="lightgray", text=letter, font=tmp_font)
+                tmp_text2.pack(side="left")
+
+                if letter == "H":
+                    letter = "M"
+                elif letter == "M":
+                    letter = "S"
+
                 tmp_text = tk.Label(self.container, bg="lightgray", text=":", font=tmp_font)
                 tmp_text.pack(side="left")
 
                 spacing2 = tk.Label(self.container, bg="lightgray", text="", font=tmp_font)
                 spacing2.pack(side="left")
+            elif i == 5:
+                tmp_font = tkFont.Font(family="Arial", size=12)
+                
+                tmp_text = tk.Label(self.container, bg="lightgray", text="S", font= tmp_font)
+                tmp_text.pack(side="left")
 
 
 
@@ -263,6 +279,6 @@ class OverwatchBlocker:
 
         self.logging_text.pack(expand=True, fill=tk.BOTH)
 
-        self.create_selections()
+        #self.create_selections()
 
         self.window.mainloop()
